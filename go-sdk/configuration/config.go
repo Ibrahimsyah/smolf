@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Ibrahimsyah/smolf/sdk/env"
+	"github.com/Ibrahimsyah/smolf/go-sdk/env"
 	"gopkg.in/yaml.v3"
 )
 

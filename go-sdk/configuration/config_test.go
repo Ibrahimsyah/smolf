@@ -3,7 +3,7 @@ package configuration
 import (
 	"testing"
 
-	"github.com/Ibrahimsyah/smolf/sdk/env"
+	"github.com/Ibrahimsyah/smolf/go-sdk/env"
 	"github.com/stretchr/testify/assert"
 )
 

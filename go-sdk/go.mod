@@ -1,4 +1,4 @@
-module github.com/Ibrahimsyah/smolf/sdk
+module github.com/Ibrahimsyah/smolf/go-sdk
 
 go 1.22.4
 

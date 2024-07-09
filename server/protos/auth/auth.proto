@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "auth/";
+
+message AuthEmailPasswordRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message AuthResponse {
+    string token = 1;
+    int32 user_id = 2;
+}
+
+service AuthService {
+    rpc AuthByEmailAndPassword(AuthEmailPasswordRequest) returns (AuthResponse);
+}

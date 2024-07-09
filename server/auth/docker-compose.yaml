@@ -1,0 +1,44 @@
+services:
+  app:
+    build: .
+    restart: always
+    environment:
+      - TZ=Asia/Jakarta
+    ports:
+      - "55001:55001"
+      - "5001:5001"
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: "postgres"
+    environment:
+      PGUSER: ${DB_USERNAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      TZ: "Asia/Jakarta"
+    ports:
+      - "${DB_OPEN_PORT}:5432"
+    volumes:
+      - ./docker/db/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./migration:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://${DB_USERNAME}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable",
+        "up"
+      ]
+    depends_on:
+      db:
+        condition: service_healthy

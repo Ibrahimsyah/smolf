@@ -1,0 +1,9 @@
+type Mutation {
+    Register(payload: RegisterPayload!): AuthResponse!
+}
+
+input RegisterPayload {
+    email: String!
+    username: String!
+    password: String!
+}

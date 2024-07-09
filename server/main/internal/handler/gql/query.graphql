@@ -1,0 +1,13 @@
+type Query {
+    Login(payload: LoginPayload!): AuthResponse!
+}
+
+input LoginPayload {
+    email: String!
+    password: String!
+}
+
+type AuthResponse {
+    user_id: Int!
+    token: String!
+}

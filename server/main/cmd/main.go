@@ -7,21 +7,47 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	graph "smolf-main/gql"
-	"smolf-main/internal/handler/gql"
-	"smolf-main/internal/handler/gql/auth"
 	"syscall"
 	"time"
 
+	graph "smolf-main/gql"
+	"smolf-main/internal/handler/gql"
+	authHandler "smolf-main/internal/handler/gql/auth"
+	repoGRPC "smolf-main/internal/repository/grpc"
+	userUC "smolf-main/internal/usecase/user"
+	authPB "smolf-main/pb/auth"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"google.golang.org/grpc"
 )
 
 func main() {
+	// Initialize grpc client
+	//
+	// Auth
+	authGRPCClient, err := grpc.NewClient("localhost:50051", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	authClient := authPB.NewAuthServiceClient(authGRPCClient)
+
+	// Initialize repositories
+	repositoryGRPC := repoGRPC.NewRepository(repoGRPC.RepositoryParam{
+		Auth: authClient,
+	})
+
+	// Initialize usecases
+	userUC := userUC.NewUsecase(repositoryGRPC)
+
+	// Initialize handlers
+	authHandlers := authHandler.NewHandler(userUC)
+
+	// Initialize graphql server
 	srv := handler.NewDefaultServer(
 		graph.NewExecutableSchema(graph.Config{
 			Resolvers: gql.NewResolver(gql.ResolverParam{
-				Auth: &auth.Handler{},
+				Auth: authHandlers,
 			}),
 		}),
 	)
@@ -30,6 +56,7 @@ func main() {
 		Addr: ":5002",
 	}
 
+	// Initialize graphql http handlers
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "The system is healthy")
 	})
